@@ -1,0 +1,89 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: saddlebrown;
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 80px 1fr 80px;
+  grid-template-areas:
+    "player1 player1 player1 player1"
+    "player2 . . player3"
+    "player4 player4 player4 player4";
+}
+
+.player1 {
+  grid-area: player1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player2 {
+  grid-area: player2;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-left: 10px;
+}
+
+.player3 {
+  grid-area: player3;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 10px;
+}
+
+.player4 {
+  grid-area: player4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.diceContainer1,
+.diceContainer4 {
+  width: 100px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.diceContainer2,
+.diceContainer3 {
+  display: flex;
+  flex-direction: column;
+  height: 100px;
+  width: 60px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.diceContainer1,
+.diceContainer2 {
+  transform: rotate(180deg);
+}
+
+.diceImg {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  margin: 5px;
+}
