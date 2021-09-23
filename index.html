@@ -8,18 +8,65 @@
     <title>Liar's Dice</title>
   </head>
   <body>
-    <section class="container">
-      <div class="player1">
-        <div class="diceContainer1"></div>
+    <div class="instructions">
+      <div class="closeButton">
+        <button id="close">X</button>
       </div>
-      <div class="player2">
-        <div class="diceContainer2"></div>
+      <h2>Welcome to Liar's Dice</h2>
+
+      <h5>Instructions:</h5>
+      <ul>
+        <li>
+          Five 6-sided dice are used per player with dice cups used for
+          concealment
+        </li>
+        <li>
+          Each round, each player rolls their 5 dice, you can check what is
+          under your cup by clicking on your cup
+        </li>
+        <li>
+          Turns rotate in a clockwise direction, The first player begins bidding
+          announcing any dice face value and the minimum number of dice that the
+          player believes are showing that value, under all players cups in the
+          game
+        </li>
+        <li>
+          Ones are wild always counting as the dice face of the current bid.
+        </li>
+        <li>
+          Each player has 2 choices to make a higher bid, or challenge the
+          preivous bid by calling liar. Raising the bid means either increasing
+          the quantity, or the face value, or both.
+        </li>
+        <li>
+          If the current player challenges the previous bid, all dice are
+          revealed. if the bid is valid, the bidder wins. Otherwise, the
+          challenger wins.
+        </li>
+        <li>
+          The player who loses a round loses one of their dice. The last player
+          to still retain a die (or dice) is the winner. The loser of the last
+          round starts the bidding on the next round. If the loser of the last
+          round was eliminated, the next player starts the new round.
+        </li>
+      </ul>
+      <div class="startBtn">
+        <button id="start">Start Game</button>
+      </div>
+    </div>
+    <section class="container">
+      <button id="help" class="hidden">Help</button>
+      <div class="player4">
+        <div class="diceContainer4"></div>
       </div>
       <div class="player3">
         <div class="diceContainer3"></div>
       </div>
-      <div class="player4">
-        <div class="diceContainer4"></div>
+      <div class="player2">
+        <div class="diceContainer2"></div>
+      </div>
+      <div class="player1">
+        <div class="diceContainer1"></div>
       </div>
     </section>
     <script src="main.js"></script>
