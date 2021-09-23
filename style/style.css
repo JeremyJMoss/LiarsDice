@@ -87,7 +87,7 @@ body {
   grid-template-rows: 140px 1fr 140px;
   grid-template-areas:
     "player4 player4 player4 player4"
-    "player3 . . player2"
+    "player3 buttons buttons player2"
     "player1 player1 player1 player1";
 }
 
@@ -143,23 +143,29 @@ body {
 
 .diceContainer1,
 .diceContainer4 {
-  width: 120px;
+  width: 150px;
   height: 120px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .diceContainer2,
 .diceContainer3 {
   display: flex;
   flex-direction: column;
-  height: 120px;
+  height: 150px;
   width: 120px;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+.diceContainer1 {
+  transition: 1s ease-in-out;
 }
 
 .diceImg {
@@ -167,18 +173,89 @@ body {
   height: 20px;
   border-radius: 3px;
   margin: 5px;
+  opacity: 0;
+  transition: 500ms ease-in-out;
 }
 
-.diceContainer1 .diceCup {
+#playerDiceCup {
   cursor: pointer;
+  transition: 1s ease-in-out;
+}
+
+.transformDiceCup {
+  transform: translateX(150px) translateY(-50px) rotate(45deg);
+  transition: 1s ease-in-out;
 }
 
 .diceCup {
   width: 80px;
+  position: absolute;
 }
 
 .hidden {
   display: none;
+}
+
+.fadeIn {
+  opacity: 1;
+  transition: 1.2s ease-in-out;
+}
+
+.gameButtons {
+  grid-area: buttons;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.inputFields {
+  width: 75px;
+  text-align: center;
+  font-size: 1rem;
+  color: black;
+  text-transform: uppercase;
+  font-family: Helvetica;
+  font-weight: 900;
+  line-height: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+input {
+  padding: 5px;
+  text-align: center;
+  width: 50px;
+}
+
+.bid,
+.liar {
+  width: 100px;
+  padding: 10px;
+  border-radius: 15px;
+  font-size: 0.95rem;
+  letter-spacing: -0.5px;
+  word-spacing: 2.5px;
+  font-weight: 600;
+  font-family: Helvetica;
+  color: #222;
+  border: 1px solid black;
+  box-shadow: 6px 6px 15px 3px #222;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.bid {
+  background-color: rgb(26, 211, 26);
+  display: none;
+}
+
+.liar {
+  background-color: rgb(238, 48, 48);
 }
 
 .startBtn {

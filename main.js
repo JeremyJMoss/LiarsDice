@@ -1,11 +1,10 @@
 "use strict";
-// const dice = `<img src="/dice-${roll}.jpg" alt="dice on face ${roll}" class="diceImg" />`;
 
 const closeBtn = document.getElementById("close");
 const startBtn = document.getElementById("start");
 const instructions = document.querySelector(".instructions");
-const diceCup = document.querySelector(".diceCup");
 const help = document.getElementById("help");
+const container = document.querySelector(".container");
 
 const diceRoll = (sides) => Math.ceil(Math.random() * sides);
 
@@ -16,27 +15,41 @@ const diceRolls = {
   player4: [],
 };
 
-const displayDice = function (container) {
+const rollDice = function (container) {
+  diceRolls["player" + container] = [];
   for (let i = 0; i < 5; i++) {
     const diceContainer = document.querySelector(`.diceContainer${container}`);
     const roll = diceRoll(6);
     diceRolls["player" + container].push(roll);
-    const diceCup = `<img src="/dice-cup.png" alt="upside down dice cup" class="diceCup"/>`;
+    let diceCup = "";
+    if (container === 1) {
+      diceCup = `<img src="/dice-cup.png" alt="upside down dice cup" id="playerDiceCup" class="diceCup"/>`;
+    } else {
+      diceCup = `<img src="/dice-cup.png" alt="upside down dice cup" class="diceCup"/>`;
+    }
     diceContainer.innerHTML = diceCup;
   }
+  diceRolls["player" + container].forEach((value) => {
+    const diceContainer = document.querySelector(`.diceContainer${container}`);
+    const diceRoll = value;
+    let dice = "";
+    container === 1
+      ? (dice = `<img src="/dice-${diceRoll}.jpg" alt="dice on face ${diceRoll}" class="diceImg userDice" />`)
+      : (dice = `<img src="/dice-${diceRoll}.jpg" alt="dice on face ${diceRoll}" class="diceImg" />`);
+    diceContainer.insertAdjacentHTML("afterBegin", dice);
+  });
 };
 
 const startState = function () {
-  displayDice(1);
-  displayDice(2);
-  displayDice(3);
-  displayDice(4);
+  for (let i = 1; i < 5; i++) {
+    rollDice(i);
+  }
 };
 
 closeBtn.addEventListener("click", function (e) {
   e.preventDefault();
   instructions.classList.add("hidden");
-  help.classList.remove("hidden");
+  container.classList.remove("hidden");
 });
 
 startBtn.addEventListener("click", function (e) {
@@ -46,10 +59,18 @@ startBtn.addEventListener("click", function (e) {
   instructions.classList.add("hidden");
   startBtn.style.display = "none";
   help.classList.remove("hidden");
+  const playerDiceCup = document.getElementById("playerDiceCup");
+  const userDice = document.querySelectorAll(".userDice");
+  playerDiceCup.addEventListener("click", function () {
+    playerDiceCup.classList.toggle("transformDiceCup");
+    userDice.forEach((value) => {
+      value.classList.toggle("fadeIn");
+    });
+  });
 });
 
 help.addEventListener("click", function (e) {
   e.preventDefault();
   instructions.classList.remove("hidden");
-  help.classList.add("hidden");
+  container.classList.add("hidden");
 });
