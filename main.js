@@ -58,7 +58,7 @@ startBtn.addEventListener("click", function (e) {
   closeBtn.style.display = "flex";
   instructions.classList.add("hidden");
   startBtn.style.display = "none";
-  help.classList.remove("hidden");
+  container.classList.remove("hidden");
   const playerDiceCup = document.getElementById("playerDiceCup");
   const userDice = document.querySelectorAll(".userDice");
   playerDiceCup.addEventListener("click", function () {

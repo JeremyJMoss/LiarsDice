@@ -83,11 +83,11 @@ body {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 180px 1fr 1fr 180px;
   grid-template-rows: 140px 1fr 140px;
   grid-template-areas:
-    "player4 player4 player4 player4"
-    "player3 buttons buttons player2"
+    "player3 player3 player3 player3"
+    "player4 buttons buttons player2"
     "player1 player1 player1 player1";
 }
 
@@ -105,6 +105,7 @@ body {
   transform: scale(1, 1);
   transition: 150ms ease-in;
   cursor: pointer;
+  z-index: 1;
 }
 
 #help:hover {
@@ -115,34 +116,67 @@ body {
 
 .player1 {
   grid-area: player1;
-  display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .player2 {
   grid-area: player2;
-  display: flex;
   justify-content: flex-end;
-  align-items: center;
 }
 
 .player3 {
   grid-area: player3;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
+  justify-content: center;
 }
 
 .player4 {
   grid-area: player4;
+  justify-content: flex-start;
+}
+
+.player1,
+.player2,
+.player3,
+.player4 {
   display: flex;
-  justify-content: center;
   align-items: center;
+  position: relative;
+}
+
+.player1 h3,
+.player2 h3,
+.player3 h3,
+.player4 h3 {
+  position: absolute;
+  font-family: Helvetica;
+  font-size: 1.7rem;
+}
+
+.player1 h3 {
+  top: -1.5vw;
+}
+
+.player4 h3 {
+  transform: rotate(90deg);
+  right: 10px;
+}
+
+.player3 h3 {
+  bottom: -1.5vw;
+}
+
+.player2 h3 {
+  transform: rotate(-90deg);
+  left: 10px;
+}
+
+.activePlayer {
+  color: white;
+  filter: drop-shadow(2px 1px 1px black);
 }
 
 .diceContainer1,
-.diceContainer4 {
+.diceContainer3 {
   width: 150px;
   height: 120px;
   display: flex;
@@ -153,7 +187,7 @@ body {
 }
 
 .diceContainer2,
-.diceContainer3 {
+.diceContainer4 {
   display: flex;
   flex-direction: column;
   height: 150px;
@@ -180,11 +214,12 @@ body {
 #playerDiceCup {
   cursor: pointer;
   transition: 1s ease-in-out;
+  z-index: 1;
 }
 
 .transformDiceCup {
-  transform: translateX(150px) translateY(-50px) rotate(45deg);
-  transition: 1s ease-in-out;
+  transform: translateX(150px) translateY(-100px) rotate(45deg);
+  transition: 1.5s ease-in-out;
 }
 
 .diceCup {
@@ -198,7 +233,7 @@ body {
 
 .fadeIn {
   opacity: 1;
-  transition: 1.2s ease-in-out;
+  transition: 1.5s ease-in-out;
 }
 
 .gameButtons {
@@ -210,14 +245,14 @@ body {
   gap: 20px;
 }
 
-.inputFields {
+form {
   width: 75px;
   text-align: center;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: black;
   text-transform: uppercase;
   font-family: Helvetica;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.2rem;
   display: flex;
   flex-direction: column;
@@ -251,7 +286,6 @@ input {
 
 .bid {
   background-color: rgb(26, 211, 26);
-  display: none;
 }
 
 .liar {
@@ -283,4 +317,10 @@ input {
 #start:hover {
   transform: scale(1.03, 1.03);
   background-color: lime;
+}
+
+@media screen and (max-width: 800px) {
+  .diceCup {
+    width: 60px;
+  }
 }
