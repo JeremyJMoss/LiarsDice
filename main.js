@@ -5,6 +5,14 @@ const startBtn = document.getElementById("start");
 const instructions = document.querySelector(".instructions");
 const help = document.getElementById("help");
 const container = document.querySelector(".container");
+const bidBtn = document.getElementById("bid");
+const liarBtn = document.getElementById("liar");
+const diceNumberInput = document.getElementById("numberOfDice");
+const diceFaceInput = document.getElementById("diceFace");
+const currentBidText = document.getElementById("currentBidText");
+const currentBidContainer = document.querySelector(".currentBid");
+let allDiceObj;
+let currentBid;
 
 const diceRoll = (sides) => Math.ceil(Math.random() * sides);
 
@@ -40,6 +48,17 @@ const rollDice = function (container) {
   });
 };
 
+const diceRollsAll = function (obj) {
+  let allDice = [];
+  for (let player in obj) {
+    allDice.push(obj[player]);
+  }
+  return allDice.flat().reduce((tally, diceValue) => {
+    tally[diceValue] = (tally[diceValue] || 0) + 1;
+    return tally;
+  }, {});
+};
+
 const startState = function () {
   for (let i = 1; i < 5; i++) {
     rollDice(i);
@@ -67,10 +86,28 @@ startBtn.addEventListener("click", function (e) {
       value.classList.toggle("fadeIn");
     });
   });
+  allDiceObj = diceRollsAll(diceRolls);
+  console.log(allDiceObj);
 });
 
 help.addEventListener("click", function (e) {
   e.preventDefault();
   instructions.classList.remove("hidden");
   container.classList.add("hidden");
+});
+
+bidBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  const face = diceFaceInput.value;
+  const num = diceNumberInput.value;
+  diceFaceInput.value = "";
+  diceNumberInput.value = "";
+  if (face < 1 || face > 6) {
+    alert("Type a dice value between 1 and 6");
+  } else {
+    currentBidText.innerText = `Current Bid
+  Amount:  ${num}
+  Die Face:  ${face}`;
+    currentBidContainer.style.opacity = 1;
+  }
 });
