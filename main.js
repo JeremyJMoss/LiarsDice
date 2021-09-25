@@ -12,7 +12,7 @@ const diceFaceInput = document.getElementById("diceFace");
 const currentBidText = document.getElementById("currentBidText");
 const currentBidContainer = document.querySelector(".currentBid");
 let allDiceObj;
-let currentBid;
+let currentBid = {};
 
 const diceRoll = (sides) => Math.ceil(Math.random() * sides);
 
@@ -106,8 +106,9 @@ bidBtn.addEventListener("click", function (e) {
     alert("Type a dice value between 1 and 6");
   } else {
     currentBidText.innerText = `Current Bid
-  Amount:  ${num}
-  Die Face:  ${face}`;
+    Amount:  ${num}
+    Die Face:  ${face}`;
     currentBidContainer.style.opacity = 1;
+    diceFaceInput.blur();
   }
 });
