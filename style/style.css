@@ -26,7 +26,7 @@ body {
 
 .instructions {
   position: absolute;
-  background-color: gold;
+  background-color: rgb(86, 95, 86);
   width: 80%;
   height: 80%;
   padding-inline: 30px;
@@ -40,13 +40,15 @@ body {
 .instructions h2 {
   text-align: center;
   font-family: sketchBones;
-  font-size: 2rem;
+  font-size: 2.3rem;
+  color: #ddd;
+  margin-bottom: 10px;
 }
 
 .instructions h5 {
   font-size: 1.5rem;
   letter-spacing: -1px;
-  color: purple;
+  color: #111;
 }
 
 .instructions ul {
@@ -109,10 +111,10 @@ body {
   top: 20px;
   right: 20px;
   padding: 5px 10px;
-  box-shadow: 0 0 10px 2px white;
+  box-shadow: 0 0 8px 3px #111;
   border: none;
-  background-color: orange;
-  color: #222;
+  background-color: rgb(84, 117, 84);
+  color: #ddd;
   font-size: 1rem;
   font-weight: 700;
   border-radius: 10px;
@@ -125,7 +127,7 @@ body {
 #help:hover {
   transform: scale(1.03, 1.03);
   transform-origin: center;
-  background-color: rgb(201, 132, 4);
+  background-color: rgb(67, 94, 67);
 }
 
 .player1 {
@@ -258,7 +260,16 @@ body {
   gap: 20px;
 }
 
-form {
+.comThinking {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.comThinking span {
+  font-size: 2.3rem;
+}
+
+.gameInputs {
   width: 75px;
   text-align: center;
   font-size: 1.1rem;
@@ -271,6 +282,10 @@ form {
   justify-content: center;
   align-items: center;
   gap: 10px;
+}
+
+.winMessage {
+  display: none;
 }
 
 input {
@@ -291,10 +306,10 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .bid,
 .liar {
-  width: 100px;
+  width: 120px;
   padding: 10px;
   border-radius: 15px;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   letter-spacing: -0.5px;
   word-spacing: 2.5px;
   font-weight: 600;
@@ -307,10 +322,12 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .bid {
   background-color: rgb(26, 211, 26);
+  margin-top: 10px;
 }
 
 .liar {
   background-color: rgb(238, 48, 48);
+  margin-bottom: 10px;
 }
 
 .startBtn {
@@ -321,10 +338,11 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 #start {
-  padding: 15px;
+  margin-top: 50px;
+  padding: 25px;
   font-size: 1.2rem;
   border-radius: 1000px;
-  background-color: rgb(26, 211, 26);
+  background-color: #ddd;
   font-weight: 600;
   color: black;
   border: solid 1px black;

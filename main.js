@@ -20,12 +20,18 @@ const currentBidText = document.getElementById("currentBidText");
 const currentBidContainer = document.querySelector(".currentBid");
 const playerDiceContainer = document.querySelector(".diceContainer1");
 const playerTags = collectPlayers();
-
+const gameInputs = document.querySelector(".gameInputs");
+const thinkText = document.querySelector(".comThinking");
 /*contains the face and the ammount of the current bid in an object*/
-let currentBid = {};
+let currentBid = {
+  face: 0,
+  amount: 0,
+};
 let turn = 1;
+let liar = false;
+let activeDots;
 
-const diceRoll = (sides) => Math.ceil(Math.random() * sides);
+const randomInt = (range) => Math.ceil(Math.random() * range);
 
 const diceRolls = {
   player1: [],
@@ -34,19 +40,23 @@ const diceRolls = {
   player4: [],
 };
 
-const rollDice = function (container) {
-  diceRolls["player" + container] = [];
+const addDiceCups = function (container) {
   const diceContainer = document.querySelector(`.diceContainer${container}`);
-  for (let i = 0; i < 5; i++) {
-    const roll = diceRoll(6);
+  let diceCup = "";
+  if (container === 1) {
+    diceCup = `<img src="/dice-cup.png" alt="upside down dice cup" id="playerDiceCup" class="diceCup"/>`;
+  } else {
+    diceCup = `<img src="/dice-cup.png" alt="upside down dice cup" class="diceCup"/>`;
+  }
+  diceContainer.innerHTML = diceCup;
+};
+
+const rollDice = function (container, diceAmount) {
+  diceRolls[`player${container}`] = [];
+  const diceContainer = document.querySelector(`.diceContainer${container}`);
+  for (let i = 0; i < diceAmount; i++) {
+    const roll = randomInt(6);
     diceRolls["player" + container].push(roll);
-    let diceCup = "";
-    if (container === 1) {
-      diceCup = `<img src="/dice-cup.png" alt="upside down dice cup" id="playerDiceCup" class="diceCup"/>`;
-    } else {
-      diceCup = `<img src="/dice-cup.png" alt="upside down dice cup" class="diceCup"/>`;
-    }
-    diceContainer.innerHTML = diceCup;
   }
   diceRolls["player" + container].forEach((value) => {
     const diceRoll = value;
@@ -69,25 +79,77 @@ const diceRollsAll = function (obj) {
   }, {});
 };
 
-const computerTurns = function () {
-  playerTags.forEach((value) => {
-    value.classList.remove("activePlayer");
-  });
-  if (turn != 4) {
-    playerTags[turn].classList.add("activePlayer");
-  } else {
-    playerTags[0].classList.add("activePlayer");
+/*for when either the computer or the player calls liar*/
+const callLiar = function (e) {
+  e.preventDefault();
+  liar = true;
+  let player;
+
+  if (
+    diceRolls.allDice[currentBid.face] + diceRolls.allDice[1] <=
+    currentBid.amount
+  ) {
+    for (let player of playerTags) {
+      if (player.classList.contains("activePlayer")) {
+        player = player.innerText;
+      }
+    }
   }
-  turn++;
-  if (turn > 4) {
-    clearInterval(computerLogic);
-    turn = 1;
+};
+
+const shouldCallLiar = function () {
+  if (currentBid.amount < 5) {
+  }
+};
+
+const LogicForComputer = function () {
+  let currentPlayer;
+  for (let player of playerTags) {
+    if (player.classList.contains("activePlayer"))
+      currentPlayer = player.innerText.toLowerCase().replace(" ", "");
+  }
+  const curPlayerDice = diceRolls[currentPlayer].reduce((tally, diceValue) => {
+    tally[diceValue] = (tally[diceValue] || 0) + 1;
+    return tally;
+  }, {});
+  for (let [key, value] of Object.entries(curPlayerDice)) {
+    if (key != "1" && typeof curPlayerDice["1"] != "undefined") {
+      curPlayerDice[key] = value += curPlayerDice["1"];
+    }
+  }
+  delete curPlayerDice["1"];
+  let maxValue = 0;
+  let comKeyChoice = "";
+  for (let [key, value] of Object.entries(curPlayerDice)) {
+    if (value > maxValue) {
+      comKeyChoice = key;
+    }
+  }
+};
+
+const bid = function (diceFace, diceAmount) {
+  if (
+    (diceFace > currentBid.face && diceAmount <= currentBid.amount) ||
+    (diceFace <= currentBid.face && diceAmount > currentBid.amount) ||
+    (diceFace > currentBid.face && diceAmount > currentBid.amount)
+  ) {
+    currentBid.face = diceFace;
+    currentBid.amount = diceAmount;
+    currentBidText.innerText = `Current Bid
+    Amount:  ${diceAmount}
+    Die Face:  ${diceFace}`;
+
+    return true;
+  } else {
+    alert("Your bid was too low. Make a higher bid of either value or amount");
+    return false;
   }
 };
 
 const startState = function () {
   for (let i = 1; i < 5; i++) {
-    rollDice(i);
+    addDiceCups(i);
+    rollDice(i, 5);
   }
 };
 
@@ -105,6 +167,7 @@ startBtn.addEventListener("click", function (e) {
   startBtn.style.display = "none";
   container.classList.remove("hidden");
   diceRolls.allDice = diceRollsAll(diceRolls);
+  shouldCallLiar();
 });
 
 help.addEventListener("click", function (e) {
@@ -119,17 +182,56 @@ bidBtn.addEventListener("click", function (e) {
   const amount = +diceNumberInput.value;
   diceFaceInput.value = "";
   diceNumberInput.value = "";
-  if (face < 1 || face > 6) {
-    alert("Type a dice value between 1 and 6");
+  if (face < 2 || face > 6) {
+    alert("Type a dice value between 2 and 6\nRemember 1's are wild");
+  } else if (amount <= 0 || amount > 20) {
+    alert("Type an amount between 1 and 20");
   } else {
-    currentBid.face = face;
-    currentBid.amount = amount;
-    currentBidText.innerText = `Current Bid
-    Amount:  ${amount}
-    Die Face:  ${face}`;
+    let shouldContinue = bid(face, amount);
+    if (!shouldContinue) {
+      return;
+    }
     currentBidContainer.style.opacity = 1;
     diceFaceInput.blur();
-    let computerLogic = setInterval(computerTurns, 5000);
+    const computerTurn = function () {
+      if (liar) {
+        clearInterval(computerLogic);
+        return;
+      }
+      playerTags.forEach((value) => {
+        value.classList.remove("activePlayer");
+      });
+
+      if (turn != 4) {
+        if (typeof activeDots !== "undefined") {
+          clearInterval(activeDots);
+        }
+        playerTags[turn].classList.add("activePlayer");
+        thinkText.innerHTML = `${playerTags[turn].innerText} is thinking<span>.</span>`;
+        activeDots = setInterval(function () {
+          let dots = thinkText.querySelector("span");
+          if (dots.innerText === "....") {
+            dots.innerText = "";
+          } else {
+            dots.innerText += ".";
+          }
+        }, 500);
+      } else {
+        playerTags[0].classList.add("activePlayer");
+        clearInterval(activeDots);
+      }
+      turn++;
+      if (turn > 4) {
+        clearInterval(computerLogic);
+        turn = 1;
+        liarBtn.classList.remove("hidden");
+        gameInputs.style.display = "flex";
+        thinkText.innerHTML = "";
+      }
+    };
+    computerTurn();
+    gameInputs.style.display = " none";
+    const computerLogic = setInterval(computerTurn, 5000);
   }
 });
 
@@ -143,3 +245,5 @@ playerDiceContainer.addEventListener("click", function (e) {
     });
   }
 });
+
+liarBtn.addEventListener("click", callLiar);
