@@ -1,4 +1,11 @@
 "use strict";
+const collectPlayers = function () {
+  const playerArr = [];
+  for (let i = 1; i < 5; i++) {
+    playerArr.push(document.querySelector(`.player${i} h3`));
+  }
+  return playerArr;
+};
 
 const closeBtn = document.getElementById("close");
 const startBtn = document.getElementById("start");
@@ -11,8 +18,12 @@ const diceNumberInput = document.getElementById("numberOfDice");
 const diceFaceInput = document.getElementById("diceFace");
 const currentBidText = document.getElementById("currentBidText");
 const currentBidContainer = document.querySelector(".currentBid");
-let allDiceObj;
+const playerDiceContainer = document.querySelector(".diceContainer1");
+const playerTags = collectPlayers();
+
+/*contains the face and the ammount of the current bid in an object*/
 let currentBid = {};
+let turn = 1;
 
 const diceRoll = (sides) => Math.ceil(Math.random() * sides);
 
@@ -25,8 +36,8 @@ const diceRolls = {
 
 const rollDice = function (container) {
   diceRolls["player" + container] = [];
+  const diceContainer = document.querySelector(`.diceContainer${container}`);
   for (let i = 0; i < 5; i++) {
-    const diceContainer = document.querySelector(`.diceContainer${container}`);
     const roll = diceRoll(6);
     diceRolls["player" + container].push(roll);
     let diceCup = "";
@@ -38,7 +49,6 @@ const rollDice = function (container) {
     diceContainer.innerHTML = diceCup;
   }
   diceRolls["player" + container].forEach((value) => {
-    const diceContainer = document.querySelector(`.diceContainer${container}`);
     const diceRoll = value;
     let dice = "";
     container === 1
@@ -57,6 +67,22 @@ const diceRollsAll = function (obj) {
     tally[diceValue] = (tally[diceValue] || 0) + 1;
     return tally;
   }, {});
+};
+
+const computerTurns = function () {
+  playerTags.forEach((value) => {
+    value.classList.remove("activePlayer");
+  });
+  if (turn != 4) {
+    playerTags[turn].classList.add("activePlayer");
+  } else {
+    playerTags[0].classList.add("activePlayer");
+  }
+  turn++;
+  if (turn > 4) {
+    clearInterval(computerLogic);
+    turn = 1;
+  }
 };
 
 const startState = function () {
@@ -78,16 +104,7 @@ startBtn.addEventListener("click", function (e) {
   instructions.classList.add("hidden");
   startBtn.style.display = "none";
   container.classList.remove("hidden");
-  const playerDiceCup = document.getElementById("playerDiceCup");
-  const userDice = document.querySelectorAll(".userDice");
-  playerDiceCup.addEventListener("click", function () {
-    playerDiceCup.classList.toggle("transformDiceCup");
-    userDice.forEach((value) => {
-      value.classList.toggle("fadeIn");
-    });
-  });
-  allDiceObj = diceRollsAll(diceRolls);
-  console.log(allDiceObj);
+  diceRolls.allDice = diceRollsAll(diceRolls);
 });
 
 help.addEventListener("click", function (e) {
@@ -98,17 +115,31 @@ help.addEventListener("click", function (e) {
 
 bidBtn.addEventListener("click", function (e) {
   e.preventDefault();
-  const face = diceFaceInput.value;
-  const num = diceNumberInput.value;
+  const face = +diceFaceInput.value;
+  const amount = +diceNumberInput.value;
   diceFaceInput.value = "";
   diceNumberInput.value = "";
   if (face < 1 || face > 6) {
     alert("Type a dice value between 1 and 6");
   } else {
+    currentBid.face = face;
+    currentBid.amount = amount;
     currentBidText.innerText = `Current Bid
-    Amount:  ${num}
+    Amount:  ${amount}
     Die Face:  ${face}`;
     currentBidContainer.style.opacity = 1;
     diceFaceInput.blur();
+    let computerLogic = setInterval(computerTurns, 5000);
+  }
+});
+
+playerDiceContainer.addEventListener("click", function (e) {
+  e.preventDefault();
+  const userDice = document.querySelectorAll(".userDice");
+  if (e.target.classList.contains("diceCup")) {
+    e.target.classList.toggle("transformDiceCup");
+    userDice.forEach((value) => {
+      value.classList.toggle("fadeIn");
+    });
   }
 });
