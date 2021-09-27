@@ -284,8 +284,34 @@ body {
   gap: 10px;
 }
 
-.winMessage {
-  display: none;
+.winLoseMessage {
+  width: 450px;
+  text-align: center;
+  background-color: #ccc;
+  box-shadow: 0 0 20px 5px #111;
+  padding: 40px;
+  border-radius: 10px;
+}
+
+.winLoseMessage p {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+}
+
+.winLoseMessage button {
+  padding: 10px;
+  font-size: 1.2rem;
+  background-color: #222;
+  color: white;
+  border-radius: 5px;
+  transition: background-color 250ms ease-in-out;
+  cursor: pointer;
+  outline: none;
+  border: none;
+}
+
+.winLoseMessage button:hover {
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 input {

@@ -31,8 +31,8 @@ let currentBid = {
 let turn = 1;
 let liar = false;
 let activeDots;
-let curPlayer;
-let prevPlayer;
+let curPlayer = "player1";
+let prevPlayer = "player4";
 
 const randomInt = (range) => Math.ceil(Math.random() * range);
 
@@ -93,43 +93,64 @@ const diceRollsAll = function (obj) {
 const callLiar = function () {
   liar = true;
   const message = winLoseMessage.querySelector("p");
-  for (let player of playerTags) {
-    if (player.classList.contains("activePlayer")) {
-      curPlayer = player.innerText;
-    }
-  }
+
   if (
     diceRolls.allDice[currentBid.face] + diceRolls.allDice[1] <=
     currentBid.amount
   ) {
-    for (let player in Object.keys(playerDiceAmounts)) {
-      if (player !== curPlayer) {
-        playerDiceAmounts[player] -= 1;
-      }
-    }
+    playerDiceAmounts[prevPlayer] -= 1;
 
     if (curPlayer === "player1") {
-      message.innerText = `You have won this round! Congratulations! The board will be reset with each of your opponents with 1 less die.`;
+      message.innerText = `You have won this round! Congratulations! The board will be reset with ${
+        prevPlayer.charAt(0).toUpperCase() +
+        prevPlayer.slice(1, 6) +
+        " " +
+        prevPlayer.slice(-1)
+      } having 1 less die.`;
+    } else {
+      message.innerText = `${
+        curPlayer.charAt(0).toUpperCase() +
+        curPlayer.slice(1, 6) +
+        " " +
+        curPlayer.slice(-1)
+      } has won this round! The board will be reset with ${
+        prevPlayer.charAt(0).toUpperCase() +
+        prevPlayer.slice(1, 6) +
+        " " +
+        prevPlayer.slice(-1)
+      } having 1 less die.`;
     }
   } else {
     playerDiceAmounts[curPlayer] -= 1;
     if (curPlayer === "player1") {
       message.innerText = `You have guessed wrong! The board will reset with your dice being reduced by 1`;
     } else {
-      message.innerText = `${curPlayer} called Liar`;
+      message.innerText = `${
+        curPlayer.charAt(0).toUpperCase() +
+        curPlayer.slice(1, 6) +
+        " " +
+        curPlayer.slice(-1)
+      } called Liar, They guessed wrong so ${
+        curPlayer.charAt(0).toUpperCase() +
+        curPlayer.slice(1, 6) +
+        " " +
+        curPlayer.slice(-1) +
+        " has"
+      } lost a dice. The board will be reset.`;
     }
   }
+  winLoseMessage.classList.remove("hidden");
 };
 
 const shouldCallLiar = function () {
   if (currentBid.amount < 5) {
-    return randomInt(25);
+    return randomInt(20);
   } else if (currentBid.amount < 7) {
-    return randomInt(15);
-  } else if (currentBid.amount < 9) {
     return randomInt(10);
-  } else if (currentBid.amount < 11) {
+  } else if (currentBid.amount < 9) {
     return randomInt(5);
+  } else if (currentBid.amount < 11) {
+    return randomInt(3);
   } else {
     return randomInt(2);
   }
@@ -139,18 +160,10 @@ const logicForComputer = function () {
   if (shouldCallLiar() === 1) {
     callLiar();
   } else {
-    let currentPlayer;
-    for (let player of playerTags) {
-      if (player.classList.contains("activePlayer"))
-        currentPlayer = player.innerText.toLowerCase().replace(" ", "");
-    }
-    const curPlayerDice = diceRolls[currentPlayer].reduce(
-      (tally, diceValue) => {
-        tally[diceValue] = (tally[diceValue] || 0) + 1;
-        return tally;
-      },
-      {}
-    );
+    const curPlayerDice = diceRolls[curPlayer].reduce((tally, diceValue) => {
+      tally[diceValue] = (tally[diceValue] || 0) + 1;
+      return tally;
+    }, {});
     for (let [key, value] of Object.entries(curPlayerDice)) {
       if (key != "1" && typeof curPlayerDice["1"] != "undefined") {
         curPlayerDice[key] = value += curPlayerDice["1"];
@@ -257,8 +270,7 @@ bidBtn.addEventListener("click", function (e) {
         value.classList.remove("prevPlayer");
         if (value.classList.contains("activePlayer")) {
           value.classList.add("prevPlayer");
-          prevPlayer = value.innerText;
-          console.log(prevPlayer);
+          prevPlayer = value.innerText.toLowerCase().replace(" ", "");
         }
       });
 
@@ -272,6 +284,11 @@ bidBtn.addEventListener("click", function (e) {
           clearInterval(activeDots);
         }
         playerTags[turn].classList.add("activePlayer");
+        playerTags.forEach((value) => {
+          if (value.classList.contains("activePlayer")) {
+            curPlayer = value.innerText.toLowerCase().replace(" ", "");
+          }
+        });
         thinkText.innerHTML = `${playerTags[turn].innerText} is thinking<span>.</span>`;
         activeDots = setInterval(function () {
           let dots = thinkText.querySelector("span");
@@ -283,6 +300,11 @@ bidBtn.addEventListener("click", function (e) {
         }, 500);
       } else {
         playerTags[0].classList.add("activePlayer");
+        playerTags.forEach((value) => {
+          if (value.classList.contains("activePlayer")) {
+            curPlayer = value.innerText.toLowerCase().replace(" ", "");
+          }
+        });
         clearInterval(activeDots);
       }
       turn++;
@@ -314,4 +336,5 @@ playerDiceContainer.addEventListener("click", function (e) {
 liarBtn.addEventListener("click", function (e) {
   e.preventDefault();
   callLiar();
+  gameInputs.style.display = "none";
 });
