@@ -22,6 +22,7 @@ const playerDiceContainer = document.querySelector(".diceContainer1");
 const playerTags = collectPlayers();
 const gameInputs = document.querySelector(".gameInputs");
 const thinkText = document.querySelector(".comThinking");
+const winLoseMessage = document.querySelector(".winLoseMessage");
 /*contains the face and the ammount of the current bid in an object*/
 let currentBid = {
   face: 0,
@@ -30,8 +31,17 @@ let currentBid = {
 let turn = 1;
 let liar = false;
 let activeDots;
+let curPlayer;
+let prevPlayer;
 
 const randomInt = (range) => Math.ceil(Math.random() * range);
+
+const playerDiceAmounts = {
+  player1: 5,
+  player2: 5,
+  player3: 5,
+  player4: 5,
+};
 
 const diceRolls = {
   player1: [],
@@ -61,7 +71,7 @@ const rollDice = function (container, diceAmount) {
   diceRolls["player" + container].forEach((value) => {
     const diceRoll = value;
     let dice = "";
-    container === 1
+    container == 1
       ? (dice = `<img src="/dice-${diceRoll}.jpg" alt="dice on face ${diceRoll}" class="diceImg userDice" />`)
       : (dice = `<img src="/dice-${diceRoll}.jpg" alt="dice on face ${diceRoll}" class="diceImg" />`);
     diceContainer.insertAdjacentHTML("afterBegin", dice);
@@ -80,56 +90,95 @@ const diceRollsAll = function (obj) {
 };
 
 /*for when either the computer or the player calls liar*/
-const callLiar = function (e) {
-  e.preventDefault();
+const callLiar = function () {
   liar = true;
-  let player;
-
+  const message = winLoseMessage.querySelector("p");
+  for (let player of playerTags) {
+    if (player.classList.contains("activePlayer")) {
+      curPlayer = player.innerText;
+    }
+  }
   if (
     diceRolls.allDice[currentBid.face] + diceRolls.allDice[1] <=
     currentBid.amount
   ) {
-    for (let player of playerTags) {
-      if (player.classList.contains("activePlayer")) {
-        player = player.innerText;
+    for (let player in Object.keys(playerDiceAmounts)) {
+      if (player !== curPlayer) {
+        playerDiceAmounts[player] -= 1;
       }
+    }
+
+    if (curPlayer === "player1") {
+      message.innerText = `You have won this round! Congratulations! The board will be reset with each of your opponents with 1 less die.`;
+    }
+  } else {
+    playerDiceAmounts[curPlayer] -= 1;
+    if (curPlayer === "player1") {
+      message.innerText = `You have guessed wrong! The board will reset with your dice being reduced by 1`;
+    } else {
+      message.innerText = `${curPlayer} called Liar`;
     }
   }
 };
 
 const shouldCallLiar = function () {
   if (currentBid.amount < 5) {
+    return randomInt(25);
+  } else if (currentBid.amount < 7) {
+    return randomInt(15);
+  } else if (currentBid.amount < 9) {
+    return randomInt(10);
+  } else if (currentBid.amount < 11) {
+    return randomInt(5);
+  } else {
+    return randomInt(2);
   }
 };
 
-const LogicForComputer = function () {
-  let currentPlayer;
-  for (let player of playerTags) {
-    if (player.classList.contains("activePlayer"))
-      currentPlayer = player.innerText.toLowerCase().replace(" ", "");
-  }
-  const curPlayerDice = diceRolls[currentPlayer].reduce((tally, diceValue) => {
-    tally[diceValue] = (tally[diceValue] || 0) + 1;
-    return tally;
-  }, {});
-  for (let [key, value] of Object.entries(curPlayerDice)) {
-    if (key != "1" && typeof curPlayerDice["1"] != "undefined") {
-      curPlayerDice[key] = value += curPlayerDice["1"];
+const logicForComputer = function () {
+  if (shouldCallLiar() === 1) {
+    callLiar();
+  } else {
+    let currentPlayer;
+    for (let player of playerTags) {
+      if (player.classList.contains("activePlayer"))
+        currentPlayer = player.innerText.toLowerCase().replace(" ", "");
     }
-  }
-  delete curPlayerDice["1"];
-  let maxValue = 0;
-  let comKeyChoice = "";
-  for (let [key, value] of Object.entries(curPlayerDice)) {
-    if (value > maxValue) {
-      comKeyChoice = key;
+    const curPlayerDice = diceRolls[currentPlayer].reduce(
+      (tally, diceValue) => {
+        tally[diceValue] = (tally[diceValue] || 0) + 1;
+        return tally;
+      },
+      {}
+    );
+    for (let [key, value] of Object.entries(curPlayerDice)) {
+      if (key != "1" && typeof curPlayerDice["1"] != "undefined") {
+        curPlayerDice[key] = value += curPlayerDice["1"];
+      }
+    }
+    delete curPlayerDice["1"];
+    let maxValue = 0;
+    let comKeyChoice = "";
+    for (let [key, value] of Object.entries(curPlayerDice)) {
+      if (value > maxValue) {
+        comKeyChoice = key;
+      }
+    }
+    const randomizerArr = [1, 1, 1, 1, 1, 1, 2, 2];
+    if (comKeyChoice > currentBid.face) {
+      bid(comKeyChoice, currentBid.amount);
+    } else if (comKeyChoice <= currentBid.face) {
+      bid(
+        randomizerArr[randomInt(8) - 1] === 1 ? comKeyChoice : randomInt(5) + 1,
+        currentBid.amount + randomizerArr[randomInt(8) - 1]
+      );
     }
   }
 };
 
 const bid = function (diceFace, diceAmount) {
   if (
-    (diceFace > currentBid.face && diceAmount <= currentBid.amount) ||
+    (diceFace > currentBid.face && diceAmount >= currentBid.amount) ||
     (diceFace <= currentBid.face && diceAmount > currentBid.amount) ||
     (diceFace > currentBid.face && diceAmount > currentBid.amount)
   ) {
@@ -147,10 +196,12 @@ const bid = function (diceFace, diceAmount) {
 };
 
 const startState = function () {
-  for (let i = 1; i < 5; i++) {
-    addDiceCups(i);
-    rollDice(i, 5);
+  let contain;
+  for (let [index, value] of Object.entries(playerDiceAmounts)) {
+    contain = index.charAt(index.length - 1);
+    rollDice(contain, value);
   }
+  diceRolls.allDice = diceRollsAll(diceRolls);
 };
 
 closeBtn.addEventListener("click", function (e) {
@@ -161,13 +212,14 @@ closeBtn.addEventListener("click", function (e) {
 
 startBtn.addEventListener("click", function (e) {
   e.preventDefault();
+  for (let i = 1; i < 5; i++) {
+    addDiceCups(i);
+  }
   startState();
   closeBtn.style.display = "flex";
   instructions.classList.add("hidden");
   startBtn.style.display = "none";
   container.classList.remove("hidden");
-  diceRolls.allDice = diceRollsAll(diceRolls);
-  shouldCallLiar();
 });
 
 help.addEventListener("click", function (e) {
@@ -196,13 +248,26 @@ bidBtn.addEventListener("click", function (e) {
     const computerTurn = function () {
       if (liar) {
         clearInterval(computerLogic);
+        clearInterval(activeDots);
+        thinkText.innerHTML = "";
+
         return;
       }
+      playerTags.forEach((value) => {
+        value.classList.remove("prevPlayer");
+        if (value.classList.contains("activePlayer")) {
+          value.classList.add("prevPlayer");
+          prevPlayer = value.innerText;
+          console.log(prevPlayer);
+        }
+      });
+
       playerTags.forEach((value) => {
         value.classList.remove("activePlayer");
       });
 
       if (turn != 4) {
+        setTimeout(logicForComputer, 4500);
         if (typeof activeDots !== "undefined") {
           clearInterval(activeDots);
         }
@@ -246,4 +311,7 @@ playerDiceContainer.addEventListener("click", function (e) {
   }
 });
 
-liarBtn.addEventListener("click", callLiar);
+liarBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  callLiar();
+});
