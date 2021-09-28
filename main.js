@@ -35,7 +35,7 @@ let liar = false;
 let activeDots;
 let curPlayer = "player1";
 let prevPlayer = "player4";
-
+let computerLogic;
 const randomInt = (range) => Math.ceil(Math.random() * range);
 
 const playerDiceAmounts = {
@@ -210,6 +210,65 @@ const bid = function (diceFace, diceAmount) {
   }
 };
 
+const computerTurn = function () {
+  if (liar) {
+    clearInterval(computerLogic);
+    clearInterval(activeDots);
+    thinkText.innerHTML = "";
+
+    return;
+  }
+  playerTags.forEach((value) => {
+    value.classList.remove("prevPlayer");
+    if (value.classList.contains("activePlayer")) {
+      value.classList.add("prevPlayer");
+      prevPlayer = value.innerText.toLowerCase().replace(" ", "");
+    }
+  });
+
+  playerTags.forEach((value) => {
+    value.classList.remove("activePlayer");
+  });
+
+  if (turn != 4) {
+    setTimeout(logicForComputer, 4500);
+    if (typeof activeDots !== "undefined") {
+      clearInterval(activeDots);
+    }
+    playerTags[turn].classList.add("activePlayer");
+    playerTags.forEach((value) => {
+      if (value.classList.contains("activePlayer")) {
+        curPlayer = value.innerText.toLowerCase().replace(" ", "");
+      }
+    });
+    thinkText.innerHTML = `${playerTags[turn].innerText} is thinking<span>.</span>`;
+    activeDots = setInterval(function () {
+      let dots = thinkText.querySelector("span");
+      if (dots.innerText === "....") {
+        dots.innerText = "";
+      } else {
+        dots.innerText += ".";
+      }
+    }, 500);
+  } else {
+    playerTags[0].classList.add("activePlayer");
+    playerTags.forEach((value) => {
+      if (value.classList.contains("activePlayer")) {
+        curPlayer = value.innerText.toLowerCase().replace(" ", "");
+      }
+    });
+    clearInterval(activeDots);
+  }
+  turn++;
+  if (turn > 4) {
+    clearInterval(computerLogic);
+    turn = 1;
+    liarBtn.classList.remove("hidden");
+    gameInputs.style.display = "flex";
+    thinkText.innerHTML = "";
+  }
+};
+
 const startState = function () {
   let contain;
   for (let [index, value] of Object.entries(playerDiceAmounts)) {
@@ -260,67 +319,9 @@ bidBtn.addEventListener("click", function (e) {
     }
     currentBidContainer.style.opacity = 1;
     diceFaceInput.blur();
-    const computerTurn = function () {
-      if (liar) {
-        clearInterval(computerLogic);
-        clearInterval(activeDots);
-        thinkText.innerHTML = "";
-
-        return;
-      }
-      playerTags.forEach((value) => {
-        value.classList.remove("prevPlayer");
-        if (value.classList.contains("activePlayer")) {
-          value.classList.add("prevPlayer");
-          prevPlayer = value.innerText.toLowerCase().replace(" ", "");
-        }
-      });
-
-      playerTags.forEach((value) => {
-        value.classList.remove("activePlayer");
-      });
-
-      if (turn != 4) {
-        setTimeout(logicForComputer, 4500);
-        if (typeof activeDots !== "undefined") {
-          clearInterval(activeDots);
-        }
-        playerTags[turn].classList.add("activePlayer");
-        playerTags.forEach((value) => {
-          if (value.classList.contains("activePlayer")) {
-            curPlayer = value.innerText.toLowerCase().replace(" ", "");
-          }
-        });
-        thinkText.innerHTML = `${playerTags[turn].innerText} is thinking<span>.</span>`;
-        activeDots = setInterval(function () {
-          let dots = thinkText.querySelector("span");
-          if (dots.innerText === "....") {
-            dots.innerText = "";
-          } else {
-            dots.innerText += ".";
-          }
-        }, 500);
-      } else {
-        playerTags[0].classList.add("activePlayer");
-        playerTags.forEach((value) => {
-          if (value.classList.contains("activePlayer")) {
-            curPlayer = value.innerText.toLowerCase().replace(" ", "");
-          }
-        });
-        clearInterval(activeDots);
-      }
-      turn++;
-      if (turn > 4) {
-        clearInterval(computerLogic);
-        turn = 1;
-        liarBtn.classList.remove("hidden");
-        gameInputs.style.display = "flex";
-        thinkText.innerHTML = "";
-      }
-    };
     computerTurn();
     gameInputs.style.display = " none";
-    const computerLogic = setInterval(computerTurn, 5000);
+    computerLogic = setInterval(computerTurn, 5000);
   }
 });
 
@@ -344,9 +345,7 @@ liarBtn.addEventListener("click", function (e) {
 continueBtn.addEventListener("click", function (e) {
   e.preventDefault();
   for (let i = 1; i < 5; i++) {
-    const diceContainer = (document.querySelector(
-      `.diceContainer${i}`
-    ).innerHTML = "");
+    document.querySelector(`.diceContainer${i}`).innerHTML = "";
     addDiceCups(i);
   }
   startState();
