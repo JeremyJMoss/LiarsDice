@@ -29,7 +29,7 @@ body {
   background-color: rgb(86, 95, 86);
   width: 80%;
   height: 80%;
-  padding-inline: 30px;
+  padding-inline: 80px;
   padding-block: 10px;
   border-radius: 10px;
   top: 10%;
@@ -364,8 +364,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 #start {
-  margin-top: 50px;
-  padding: 25px;
+  margin-top: 150px;
+  padding: 30px;
   font-size: 1.2rem;
   border-radius: 1000px;
   background-color: #ddd;
@@ -380,11 +380,27 @@ input[type="number"]::-webkit-outer-spin-button {
 
 #start:hover {
   transform: scale(1.03, 1.03);
-  background-color: lime;
+  background-color: #ccc;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1100px) {
+  #start {
+    padding: 20px;
+    margin-top: 100px;
+  }
+}
+
+@media screen and (max-width: 850px) {
   .diceCup {
     width: 60px;
+  }
+
+  .instructions ul li {
+    line-height: 1.1rem;
+    margin-bottom: 10px;
+  }
+
+  #start {
+    margin-top: 50px;
   }
 }

@@ -23,6 +23,8 @@ const playerTags = collectPlayers();
 const gameInputs = document.querySelector(".gameInputs");
 const thinkText = document.querySelector(".comThinking");
 const winLoseMessage = document.querySelector(".winLoseMessage");
+const continueBtn = document.getElementById("continue");
+
 /*contains the face and the ammount of the current bid in an object*/
 let currentBid = {
   face: 0,
@@ -337,4 +339,22 @@ liarBtn.addEventListener("click", function (e) {
   e.preventDefault();
   callLiar();
   gameInputs.style.display = "none";
+});
+
+continueBtn.addEventListener("click", function (e) {
+  e.preventDefault();
+  for (let i = 1; i < 5; i++) {
+    const diceContainer = (document.querySelector(
+      `.diceContainer${i}`
+    ).innerHTML = "");
+    addDiceCups(i);
+  }
+  startState();
+  currentBid.face = 0;
+  currentBid.amount = 0;
+  liarBtn.classList.add("hidden");
+  winLoseMessage.classList.add("hidden");
+  gameInputs.style.display = "flex";
+  currentBidContainer.style.opacity = 0;
+  liar = false;
 });
