@@ -93,7 +93,6 @@ const diceRollsAll = function (obj) {
 
 /*for when either the computer or the player calls liar*/
 const callLiar = function () {
-  liar = true;
   const message = winLoseMessage.querySelector("p");
 
   if (
@@ -102,13 +101,13 @@ const callLiar = function () {
   ) {
     playerDiceAmounts[prevPlayer] -= 1;
 
-    if (curPlayer === "player1") {
+    if (curPlayer === "player2") {
       message.innerText = `You have won this round! Congratulations! The board will be reset with ${
         prevPlayer.charAt(0).toUpperCase() +
         prevPlayer.slice(1, 6) +
         " " +
         prevPlayer.slice(-1)
-      } having 1 less die.`;
+      } having 1 less die and You starting the Bids.`;
     } else {
       message.innerText = `${
         curPlayer.charAt(0).toUpperCase() +
@@ -120,12 +119,20 @@ const callLiar = function () {
         prevPlayer.slice(1, 6) +
         " " +
         prevPlayer.slice(-1)
-      } having 1 less die.`;
+      } having 1 less die and ${
+        curPlayer.charAt(0).toUpperCase() +
+        curPlayer.slice(1, 6) +
+        " " +
+        curPlayer.slice(-1)
+      } starting the bids.`;
     }
   } else {
     playerDiceAmounts[curPlayer] -= 1;
     if (curPlayer === "player1") {
-      message.innerText = `You have guessed wrong! The board will reset with your dice being reduced by 1`;
+      message.innerText = `You have guessed wrong! The board will reset with your dice being reduced by 1. And starting player set to Player 3.`;
+      curPlayer = "player3";
+      prevPlayer = "player2";
+      turn -= 1;
     } else {
       message.innerText = `${
         curPlayer.charAt(0).toUpperCase() +
@@ -138,28 +145,44 @@ const callLiar = function () {
         " " +
         curPlayer.slice(-1) +
         " has"
-      } lost a dice. The board will be reset.`;
+      } lost a dice. The board will be reset. And ${
+        prevPlayer === "player1"
+          ? "You"
+          : prevPlayer.charAt(0).toUpperCase() +
+            prevPlayer.slice(1, 6) +
+            " " +
+            prevPlayer.slice(-1)
+      } starting the bids`;
+      turn -= 1;
     }
   }
   winLoseMessage.classList.remove("hidden");
+  clearInterval(computerLogic);
+  clearInterval(activeDots);
+  thinkText.innerHTML = "";
 };
 
-const shouldCallLiar = function () {
-  if (currentBid.amount < 5) {
-    return randomInt(20);
-  } else if (currentBid.amount < 7) {
-    return randomInt(10);
-  } else if (currentBid.amount < 9) {
-    return randomInt(5);
-  } else if (currentBid.amount < 11) {
-    return randomInt(3);
-  } else {
+const shouldCallLiar = function (x) {
+  if (currentBid.amount < 0.34 * x) {
+    return randomInt(15);
+  } else if (currentBid.amount < 0.5 * x) {
+    return randomInt(8);
+  } else if (currentBid.amount < 0.6 * x) {
+    return randomInt(4);
+  } else if (currentBid.amount < 0.7 * x) {
     return randomInt(2);
+  } else {
+    let arr = [1, 1, 1, 1, 1, 2, 2, 2];
+    return arr[randomInt(arr.length - 1)];
   }
 };
 
 const logicForComputer = function () {
-  if (shouldCallLiar() === 1) {
+  let allDice = [];
+  for (let player in diceRolls) {
+    allDice.push(diceRolls[player]);
+  }
+  if (shouldCallLiar(allDice.length) === 1) {
     callLiar();
   } else {
     const curPlayerDice = diceRolls[curPlayer].reduce((tally, diceValue) => {
@@ -211,13 +234,6 @@ const bid = function (diceFace, diceAmount) {
 };
 
 const computerTurn = function () {
-  if (liar) {
-    clearInterval(computerLogic);
-    clearInterval(activeDots);
-    thinkText.innerHTML = "";
-
-    return;
-  }
   playerTags.forEach((value) => {
     value.classList.remove("prevPlayer");
     if (value.classList.contains("activePlayer")) {
@@ -353,7 +369,14 @@ continueBtn.addEventListener("click", function (e) {
   currentBid.amount = 0;
   liarBtn.classList.add("hidden");
   winLoseMessage.classList.add("hidden");
-  gameInputs.style.display = "flex";
   currentBidContainer.style.opacity = 0;
   liar = false;
+  if (curPlayer === "player4") {
+    computerTurn();
+  } else if (curPlayer !== "player4" || curPlayer !== "player1") {
+    computerTurn();
+    computerLogic = setInterval(computerLogic, 5000);
+  } else {
+    gameInputs.style.display = "flex";
+  }
 });
