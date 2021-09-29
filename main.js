@@ -45,6 +45,18 @@ const playerDiceAmounts = {
   player4: 5,
 };
 
+const calcTotalDice = function () {
+  let sum = 0;
+  for (let value of Object.values(playerDiceAmounts)) {
+    sum += value;
+  }
+  return sum;
+};
+
+const totalDice = calcTotalDice();
+
+console.log(totalDice);
+
 const diceRolls = {
   player1: [],
   player2: [],
@@ -93,21 +105,23 @@ const diceRollsAll = function (obj) {
 
 /*for when either the computer or the player calls liar*/
 const callLiar = function () {
+  console.log("function invoked");
+  liar = true;
   const message = winLoseMessage.querySelector("p");
-
+  clearInterval(computerLogic);
+  clearInterval(activeDots);
+  thinkText.innerHTML = "";
   if (
-    diceRolls.allDice[currentBid.face] + diceRolls.allDice[1] <=
+    diceRolls.allDice[currentBid.face] + diceRolls.allDice["1"] <=
     currentBid.amount
   ) {
     playerDiceAmounts[prevPlayer] -= 1;
-
-    if (curPlayer === "player2") {
-      message.innerText = `You have won this round! Congratulations! The board will be reset with ${
-        prevPlayer.charAt(0).toUpperCase() +
-        prevPlayer.slice(1, 6) +
-        " " +
-        prevPlayer.slice(-1)
-      } having 1 less die and You starting the Bids.`;
+    console.log(curPlayer);
+    if (curPlayer === "player1") {
+      message.innerText = `You have won this round! Congratulations! The board will be reset with Player 4 having 1 less die and you starting the bids.`;
+      curPlayer = "player1";
+      prevPlayer = "player4";
+      turn = 1;
     } else {
       message.innerText = `${
         curPlayer.charAt(0).toUpperCase() +
@@ -125,14 +139,15 @@ const callLiar = function () {
         " " +
         curPlayer.slice(-1)
       } starting the bids.`;
+      turn -= 1;
     }
   } else {
     playerDiceAmounts[curPlayer] -= 1;
     if (curPlayer === "player1") {
-      message.innerText = `You have guessed wrong! The board will reset with your dice being reduced by 1. And starting player set to Player 3.`;
-      curPlayer = "player3";
-      prevPlayer = "player2";
-      turn -= 1;
+      message.innerText = `You have guessed wrong! The board will reset with your dice being reduced by 1. And starting player set to Player 4.`;
+      curPlayer = "player4";
+      prevPlayer = "player3";
+      turn = 4;
     } else {
       message.innerText = `${
         curPlayer.charAt(0).toUpperCase() +
@@ -143,33 +158,35 @@ const callLiar = function () {
         curPlayer.charAt(0).toUpperCase() +
         curPlayer.slice(1, 6) +
         " " +
-        curPlayer.slice(-1) +
-        " has"
-      } lost a dice. The board will be reset. And ${
+        curPlayer.slice(-1)
+      } has lost a dice. The board will be reset. And ${
         prevPlayer === "player1"
-          ? "You"
+          ? "you"
           : prevPlayer.charAt(0).toUpperCase() +
             prevPlayer.slice(1, 6) +
             " " +
             prevPlayer.slice(-1)
-      } starting the bids`;
-      turn -= 1;
+      } will start the bids`;
+      curPlayer = prevPlayer;
+      prevPlayer =
+        curPlayer.slice(0, 6) +
+        (prevPlayer.slice(-1) - 1 === 0 ? 4 : prevPlayer.slice(-1) - 1);
     }
+    turn -= 1;
   }
   winLoseMessage.classList.remove("hidden");
-  clearInterval(computerLogic);
-  clearInterval(activeDots);
-  thinkText.innerHTML = "";
 };
 
-const shouldCallLiar = function (x) {
-  if (currentBid.amount < 0.34 * x) {
+const shouldCallLiar = function () {
+  if (currentBid.amount < 2) {
+    return 2;
+  } else if (currentBid.amount < 0.34 * totalDice) {
     return randomInt(15);
-  } else if (currentBid.amount < 0.5 * x) {
+  } else if (currentBid.amount < 0.5 * totalDice) {
     return randomInt(8);
-  } else if (currentBid.amount < 0.6 * x) {
+  } else if (currentBid.amount < 0.6 * totalDice) {
     return randomInt(4);
-  } else if (currentBid.amount < 0.7 * x) {
+  } else if (currentBid.amount < 0.7 * totalDice) {
     return randomInt(2);
   } else {
     let arr = [1, 1, 1, 1, 1, 2, 2, 2];
@@ -178,11 +195,9 @@ const shouldCallLiar = function (x) {
 };
 
 const logicForComputer = function () {
-  let allDice = [];
-  for (let player in diceRolls) {
-    allDice.push(diceRolls[player]);
-  }
-  if (shouldCallLiar(allDice.length) === 1) {
+  clearInterval(activeDots);
+  thinkText.innerHTML = "";
+  if (shouldCallLiar() === 1) {
     callLiar();
   } else {
     const curPlayerDice = diceRolls[curPlayer].reduce((tally, diceValue) => {
@@ -203,7 +218,9 @@ const logicForComputer = function () {
       }
     }
     const randomizerArr = [1, 1, 1, 1, 1, 1, 2, 2];
-    if (comKeyChoice > currentBid.face) {
+    if (currentBid.amount < 2) {
+      bid(comKeyChoice, 2);
+    } else if (comKeyChoice > currentBid.face) {
       bid(comKeyChoice, currentBid.amount);
     } else if (comKeyChoice <= currentBid.face) {
       bid(
@@ -211,6 +228,12 @@ const logicForComputer = function () {
         currentBid.amount + randomizerArr[randomInt(8) - 1]
       );
     }
+  }
+  if (!liar) {
+    clearInterval(activeDots);
+    thinkText.innerText = `
+    Bid amount:  ${currentBid.amount}
+    Dice face:  ${currentBid.face}`;
   }
 };
 
@@ -234,20 +257,23 @@ const bid = function (diceFace, diceAmount) {
 };
 
 const computerTurn = function () {
+  currentBidContainer.style.opacity = 1;
+  if (liar === true) {
+    clearInterval(computerLogic);
+    clearInterval(activeDots);
+    return;
+  }
   playerTags.forEach((value) => {
     value.classList.remove("prevPlayer");
     if (value.classList.contains("activePlayer")) {
       value.classList.add("prevPlayer");
       prevPlayer = value.innerText.toLowerCase().replace(" ", "");
     }
-  });
-
-  playerTags.forEach((value) => {
     value.classList.remove("activePlayer");
   });
 
   if (turn != 4) {
-    setTimeout(logicForComputer, 4500);
+    setTimeout(logicForComputer, 3500);
     if (typeof activeDots !== "undefined") {
       clearInterval(activeDots);
     }
@@ -294,6 +320,48 @@ const startState = function () {
   diceRolls.allDice = diceRollsAll(diceRolls);
 };
 
+const reset = function () {
+  liar = false;
+  for (let i = 1; i < 5; i++) {
+    document.querySelector(`.diceContainer${i}`).innerHTML = "";
+    addDiceCups(i);
+  }
+  startState();
+  currentBid.face = 0;
+  currentBid.amount = 0;
+  liarBtn.classList.add("hidden");
+  winLoseMessage.classList.add("hidden");
+  currentBidContainer.style.opacity = 0;
+  playerTags.forEach(function (value) {
+    value.classList.remove("activePlayer");
+    value.classList.remove("prevPlayer");
+  });
+
+  playerTags.forEach((value) => {
+    if (value.innerText.toLowerCase().replace(" ", "") === curPlayer) {
+      value.classList.add("activePlayer");
+    }
+    if (value.innerText.toLowerCase().replace(" ", "") === prevPlayer) {
+      value.classList.add("prevPlayer");
+    }
+  });
+  console.log(curPlayer);
+  if (curPlayer === "player1") {
+    gameInputs.style.display = "flex";
+  } else {
+    thinkText.innerHTML = `${
+      curPlayer.charAt(0).toUpperCase() +
+      curPlayer.slice(1, 6) +
+      " " +
+      curPlayer.slice(-1)
+    }'s turn to start.`;
+    setTimeout(function () {
+      computerTurn();
+      computerLogic = setInterval(computerTurn, 6000);
+    }, 2000);
+  }
+};
+
 closeBtn.addEventListener("click", function (e) {
   e.preventDefault();
   instructions.classList.add("hidden");
@@ -326,8 +394,8 @@ bidBtn.addEventListener("click", function (e) {
   diceNumberInput.value = "";
   if (face < 2 || face > 6) {
     alert("Type a dice value between 2 and 6\nRemember 1's are wild");
-  } else if (amount <= 0 || amount > 20) {
-    alert("Type an amount between 1 and 20");
+  } else if (amount <= 0 || amount > totalDice) {
+    alert(`Type an amount between 1 and ${totalDice}`);
   } else {
     let shouldContinue = bid(face, amount);
     if (!shouldContinue) {
@@ -337,7 +405,7 @@ bidBtn.addEventListener("click", function (e) {
     diceFaceInput.blur();
     computerTurn();
     gameInputs.style.display = " none";
-    computerLogic = setInterval(computerTurn, 5000);
+    computerLogic = setInterval(computerTurn, 6000);
   }
 });
 
@@ -352,31 +420,14 @@ playerDiceContainer.addEventListener("click", function (e) {
   }
 });
 
-liarBtn.addEventListener("click", function (e) {
+liarBtn.addEventListener("click", (e) => {
   e.preventDefault();
-  callLiar();
   gameInputs.style.display = "none";
+  callLiar();
+  reset();
 });
 
-continueBtn.addEventListener("click", function (e) {
+continueBtn.addEventListener("click", (e) => {
   e.preventDefault();
-  for (let i = 1; i < 5; i++) {
-    document.querySelector(`.diceContainer${i}`).innerHTML = "";
-    addDiceCups(i);
-  }
-  startState();
-  currentBid.face = 0;
-  currentBid.amount = 0;
-  liarBtn.classList.add("hidden");
-  winLoseMessage.classList.add("hidden");
-  currentBidContainer.style.opacity = 0;
-  liar = false;
-  if (curPlayer === "player4") {
-    computerTurn();
-  } else if (curPlayer !== "player4" || curPlayer !== "player1") {
-    computerTurn();
-    computerLogic = setInterval(computerLogic, 5000);
-  } else {
-    gameInputs.style.display = "flex";
-  }
+  reset();
 });
