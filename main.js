@@ -24,6 +24,7 @@ const gameInputs = document.querySelector(".gameInputs");
 const thinkText = document.querySelector(".comThinking");
 const winLoseMessage = document.querySelector(".winLoseMessage");
 const continueBtn = document.getElementById("continue");
+const amountContainer = document.querySelector(".diceAmountsContainer");
 
 /*contains the face and the ammount of the current bid in an object*/
 let currentBid = {
@@ -92,6 +93,21 @@ const rollDice = function (container, diceAmount) {
   });
 };
 
+const createDiceAmounts = function () {
+  amountContainer.innerHTML = "";
+
+  for (let [index, value] of Object.entries(playerDiceAmounts)) {
+    let li = document.createElement("li");
+    li.innerHTML = `${
+      index.slice(0, 1).toUpperCase() +
+      index.slice(1, index.length - 1) +
+      " " +
+      index.slice(-1)
+    }: <span>${value}</span>`;
+    amountContainer.appendChild(li);
+  }
+};
+
 const diceRollsAll = function (obj) {
   let allDice = [];
   for (let player in obj) {
@@ -105,7 +121,6 @@ const diceRollsAll = function (obj) {
 
 /*for when either the computer or the player calls liar*/
 const callLiar = function () {
-  console.log("function invoked");
   liar = true;
   const message = winLoseMessage.querySelector("p");
   clearInterval(computerLogic);
@@ -318,6 +333,7 @@ const startState = function () {
     rollDice(contain, value);
   }
   diceRolls.allDice = diceRollsAll(diceRolls);
+  createDiceAmounts();
 };
 
 const reset = function () {
@@ -354,7 +370,7 @@ const reset = function () {
       curPlayer.slice(1, 6) +
       " " +
       curPlayer.slice(-1)
-    }'s turn to start.`;
+    } will start.`;
     setTimeout(function () {
       computerTurn();
       computerLogic = setInterval(computerTurn, 6000);
@@ -424,7 +440,6 @@ liarBtn.addEventListener("click", (e) => {
   e.preventDefault();
   gameInputs.style.display = "none";
   callLiar();
-  reset();
 });
 
 continueBtn.addEventListener("click", (e) => {
