@@ -451,4 +451,8 @@ input[type="number"]::-webkit-outer-spin-button {
   .diceCup {
     width: 60px;
   }
+
+  #start {
+    margin-top: 50px;
+  }
 }

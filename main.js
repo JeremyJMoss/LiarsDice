@@ -134,8 +134,8 @@ const callLiar = function () {
     console.log(curPlayer);
     if (curPlayer === "player1") {
       message.innerText = `You have won this round! Congratulations! The board will be reset with Player 4 having 1 less die and you starting the bids.`;
-      curPlayer = "player1";
-      prevPlayer = "player4";
+      curPlayer = curPlayer;
+      prevPlayer = prevPlayer;
       turn = 1;
     } else {
       message.innerText = `${
@@ -160,9 +160,12 @@ const callLiar = function () {
     playerDiceAmounts[curPlayer] -= 1;
     if (curPlayer === "player1") {
       message.innerText = `You have guessed wrong! The board will reset with your dice being reduced by 1. And starting player set to Player 4.`;
-      curPlayer = "player4";
-      prevPlayer = "player3";
-      turn = 4;
+      curPlayer = prevPlayer;
+      prevPlayer =
+        prevPlayer.slice(0, 6) + prevPlayer.slice(-1) - 1 === 0
+          ? 4
+          : prevPlayer.slice(-1) - 1;
+      turn = Object.keys(playerDiceAmounts).length;
     } else {
       message.innerText = `${
         curPlayer.charAt(0).toUpperCase() +
@@ -287,7 +290,7 @@ const computerTurn = function () {
     value.classList.remove("activePlayer");
   });
 
-  if (turn != 4) {
+  if (turn != Object.keys(playerDiceAmounts).length) {
     setTimeout(logicForComputer, 3500);
     if (typeof activeDots !== "undefined") {
       clearInterval(activeDots);
@@ -317,7 +320,7 @@ const computerTurn = function () {
     clearInterval(activeDots);
   }
   turn++;
-  if (turn > 4) {
+  if (turn > Object.keys(playerDiceAmounts).length) {
     clearInterval(computerLogic);
     turn = 1;
     liarBtn.classList.remove("hidden");
@@ -327,10 +330,8 @@ const computerTurn = function () {
 };
 
 const startState = function () {
-  let contain;
   for (let [index, value] of Object.entries(playerDiceAmounts)) {
-    contain = index.charAt(index.length - 1);
-    rollDice(contain, value);
+    rollDice(+index.slice(-1), value);
   }
   diceRolls.allDice = diceRollsAll(diceRolls);
   createDiceAmounts();
@@ -340,7 +341,9 @@ const reset = function () {
   liar = false;
   for (let i = 1; i < 5; i++) {
     document.querySelector(`.diceContainer${i}`).innerHTML = "";
-    addDiceCups(i);
+  }
+  for (let index of Object.keys(playerDiceAmounts)) {
+    addDiceCups(+index.slice(-1));
   }
   startState();
   currentBid.face = 0;
@@ -361,7 +364,6 @@ const reset = function () {
       value.classList.add("prevPlayer");
     }
   });
-  console.log(curPlayer);
   if (curPlayer === "player1") {
     gameInputs.style.display = "flex";
   } else {
@@ -386,8 +388,8 @@ closeBtn.addEventListener("click", function (e) {
 
 startBtn.addEventListener("click", function (e) {
   e.preventDefault();
-  for (let i = 1; i < 5; i++) {
-    addDiceCups(i);
+  for (let index of Object.keys(playerDiceAmounts)) {
+    addDiceCups(+index.slice(-1));
   }
   startState();
   closeBtn.style.display = "flex";
